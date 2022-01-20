@@ -1,12 +1,11 @@
 import streamlit as st
 import string 
 import re
-import pandas as pd
-import seaborn as sns
-import plotly.express as px
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud
 from PIL import Image
 
 st.set_page_config(layout="wide")
@@ -32,10 +31,10 @@ link1 = "https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/mai
 link2 = "https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/main/2022-01%20Wild%20Code%20School%20x%20ManoMano_%20CES%20Data%20Set%20-%20September%202021.csv"
 link3 = "https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/main/2022-01%20Wild%20Code%20School%20x%20ManoMano_%20CES%20Data%20Set%20-%20October%202021.csv"
 link4 = "https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/main/2022-01%20Wild%20Code%20School%20x%20ManoMano_%20CES%20Data%20Set%20-%20November%202021.csv"
-df_August = pd.read_csv(link1)
-df_September = pd.read_csv(link2)
-df_October = pd.read_csv(link3)
-df_November = pd.read_csv(link4)
+df_August = pd.read_csv(link1, low_memory=False)
+df_September = pd.read_csv(link2, low_memory=False)
+df_October = pd.read_csv(link3, low_memory=False)
+df_November = pd.read_csv(link4, low_memory=False)
 df = pd.concat([df_August,df_September,df_October,df_November])
 
 table = st.sidebar.checkbox("Show DataFrame")
@@ -169,7 +168,49 @@ if page == "DataFrame analysis":
         st.pyplot(fig.figure)
         
 if page == "Shipping Fees":
-    print("ok")
+    st.title("ANALYSIS OF THE SHIPPING FEE IMPACT")
+
+    col1,col2,col3 = st.columns([1,20,1])
+    with col2:
+        # Creation of dataframes from df_work to use as data to plot
+
+        # Shipping_fees_df creation
+        shipping_fees_df = df_work['shipping_fees_bucket'].value_counts().rename_axis('shipping_fees_bucket').to_frame('counts').reset_index()
+
+        # Shipping_fees_bucket_df creation
+        shipping_fees_bucket_df = df_work.groupby(["shipping_fees_bucket"]).agg({'score':'mean', 'shipping_fees_bucket':'count'})
+        shipping_fees_bucket_df.rename(columns={shipping_fees_bucket_df.columns[1]: "count" }, inplace = True)
+        shipping_fees_bucket_df.sort_values(by='count', ascending=False, inplace=True)
+        shipping_fees_bucket_df.reset_index(inplace=True)
+
+        # Definition of the figure and subplots
+        fig, ax = plt.subplots(1,2, figsize=(15,5))
+        fig.suptitle('Correlation between shipping fees and score \n From August to November 2021')
+        plt.subplots_adjust(wspace = 0.8, top=0.8)
+
+        # PIE CHART SHIPPING FEES BUCKET
+        sns.set_style("dark")
+        sns.despine()
+        ax[0].pie(shipping_fees_df['counts'], autopct='%1.1f%%', pctdistance = 1.1, textprops={'fontsize': 14},
+            colors=['lime','chartreuse','aquamarine','darkturquoise','darkcyan','darkslateblue','mintcream'])
+        ax[0].legend(labels=shipping_fees_df['shipping_fees_bucket'], title = "Shipping fees bucket", loc = 'center right',
+            bbox_to_anchor=(1.6, 0.5))
+        ax[0].set(title='Weight of shipping fees buckets')
+
+        # BART AND LINE PLOT SCORE PER SHIPPING FEES BUCKET
+        sns.set_style("dark")
+        sns.despine()
+        sns.set_style('ticks')
+        ax2 = sns.barplot(ax=ax[1], data=shipping_fees_bucket_df, x='shipping_fees_bucket', y='count', color = 'mediumspringgreen')
+        ax2.set(xlabel = "Shipping fees bucket", ylabel = "Number of transactions", title="Number of transactions per shipping fees bucket")
+        ax2.tick_params('x', labelrotation=45)
+        ax3 = ax2.twinx()
+        sns.lineplot(ax=ax3, data=shipping_fees_bucket_df, x='shipping_fees_bucket', y='score', color="blue", sort=False)
+        ax3.set(ylabel = "Average score")
+        ax3.set_ylim([7, 10])
+
+        # Figure display
+        st.pyplot(fig.figure)
     
 if page == "Connexion":
     print("ok")
