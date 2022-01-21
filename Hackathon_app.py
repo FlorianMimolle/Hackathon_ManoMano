@@ -242,7 +242,7 @@ if page == "Payment":
     for i in dfupaycount["#difficulty Paying"] :
         dfupaycount["% payment issues"] = (dfupaycount["#difficulty Paying"] / dfupaycount["#total_transactions"])*100
     dfupaycount["% payment issues"] = round(dfupaycount["% payment issues"],2)
-    dfu_sort = dfupaycount[["% payment issues"]].sort_values(by = "% payment issues", ascending = False).reset_index()
+    dfu_sort = dfupaycount[["% payment issues","#total_transactions"]].sort_values(by = "% payment issues", ascending = False).reset_index()
 
     fig = plt.figure(figsize=(10, 10))
     plt.bar(dfu_sort["payment_method"],dfu_sort["% payment issues"])
@@ -252,3 +252,5 @@ if page == "Payment":
     col1, col2,col3 = st.columns([1,3,2])
     with col2:
         st.pyplot(fig.figure)
+    with col3:
+	dfu_sort["#total_transactions"]
