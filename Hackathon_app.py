@@ -184,6 +184,7 @@ if page == "Shipping Fees":
         shipping_fees_bucket_df.reset_index(inplace=True)
 
         # Definition of the figure and subplots
+        sns.set(rc={'axes.facecolor':'silver', 'figure.facecolor':'silver'})
         fig, ax = plt.subplots(1,2, figsize=(15,5))
         fig.suptitle('Correlation between shipping fees and score \n From August to November 2021')
         plt.subplots_adjust(wspace = 0.8, top=0.8)
@@ -204,6 +205,12 @@ if page == "Shipping Fees":
         ax2 = sns.barplot(ax=ax[1], data=shipping_fees_bucket_df, x='shipping_fees_bucket', y='count', color = 'mediumspringgreen')
         ax2.set(xlabel = "Shipping fees bucket", ylabel = "Number of transactions", title="Number of transactions per shipping fees bucket")
         ax2.tick_params('x', labelrotation=45)
+        for bar in ax2.patches:
+            ax2.annotate(format(bar.get_height(), '.0f'),
+                   (bar.get_x() + bar.get_width() / 2,
+                    bar.get_height()), ha='center', va='center',
+                   size=9, xytext=(0, 8),
+                   textcoords='offset points')
         ax3 = ax2.twinx()
         sns.lineplot(ax=ax3, data=shipping_fees_bucket_df, x='shipping_fees_bucket', y='score', color="blue", sort=False)
         ax3.set(ylabel = "Average score")
