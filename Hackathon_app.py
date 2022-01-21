@@ -79,9 +79,9 @@ if page == "DataFrame analysis":
     
     col1,col2 = st.columns(2)
     with col1:
-        st.title("BAD COMMENTS (score ≤ 6)")
+        st.title("BAD COMMENTS\n(score ≤ 6)")
     with col2:
-        st.title("GOOD COMMENTS (score ≥ 7)")
+        st.title("GOOD COMMENTS\n(score ≥ 7)")
     mot_bad = pd.read_csv("https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/main/df_NLP_bad%20(1)", sep = ",")
     mot_good = pd.read_csv("https://raw.githubusercontent.com/FlorianMimolle/Hackathon_ManoMano/main/df_NLP_good%20(1)", sep = ",")
    	
