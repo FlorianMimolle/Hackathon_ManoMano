@@ -1,12 +1,10 @@
 import streamlit as st
-import string 
 import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from wordcloud import WordCloud
-from PIL import Image
 
 st.set_page_config(layout="wide")
 
