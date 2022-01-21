@@ -38,7 +38,7 @@ df_November = pd.read_csv(link4, low_memory=False)
 df = pd.concat([df_August,df_September,df_October,df_November])
 
 table = st.sidebar.checkbox("Show DataFrame")
-page = st.sidebar.radio("Page",("DataFrame analysis","Shipping Fees","Connexion"))
+page = st.sidebar.radio("Page",("DataFrame analysis","Shipping Fees","Payment"))
 pays = st.sidebar.radio("Filter Country",('all','GB', 'FR', 'IT', 'DE', 'ES'))
 b2b = st.sidebar.radio("Type of customers",('all','b2b',"b2c"))
 
@@ -219,5 +219,38 @@ if page == "Shipping Fees":
         # Figure display
         st.pyplot(fig.figure)
     
-if page == "Connexion":
-    print("ok")
+if page == "Payment":
+    st.title("ANALYSIS OF THE PAYMENT METHOD IMPACT")
+    dfu=df_work[~df_work.tags.isna()].reset_index()
+    dfu=(dfu.set_index(['index', 'id', 'comment', 'original_comment', 'score', 'data_scale',
+		'data_source', 'created_at', 'date', 'day', 'month', 'is_mf', 'device',
+		'family', 'is_b2b', 'reason', 'browser', 'zipcode', 'category',
+		'language', 'platform', 'provider', 'first_order', 'nb_articles',
+		'csat_presales', 'shipping_fees', 'bv_transaction', 'payment_method',
+		'operating_system', 'last_paid_channel', 'has_presales_contact',
+		'shipping_fees_bucket', 'bv_transaction_bucket',
+		'has_manodvisor_contact', 'themes']).apply(lambda x: x.str.split(';').explode()).reset_index())
+    dfu.tags=dfu.tags.apply(lambda x: x.replace("Detractor '"," Detractor"))
+    dfu.tags=dfu.tags.apply(lambda x: x.replace(" Detractor -"," Detractor-"))
+    dfu.tags=dfu.tags.apply(lambda x: x.strip())
+    dfu.tags=dfu.tags.apply(lambda x: x.replace("Detractor- ",""))
+    dfu.tags=dfu.tags.sort_values()
+    dfupay = dfu[dfu["tags"]=="Difficulty Paying"]
+    dfupaycount = dfupay.groupby(by="payment_method").count()[["id"]]
+    dfupaycount.rename(columns={"id":"#difficulty Paying"}, inplace=True)
+    dfupaycounttot = df.groupby(by="payment_method").count()[["id"]]
+    dfupaycounttot.rename(columns={"id":"#total_transactions"}, inplace=True)
+    dfupaycount = dfupaycount.join(dfupaycounttot, how="inner")
+    for i in dfupaycount["#difficulty Paying"] :
+        dfupaycount["% payment issues"] = (dfupaycount["#difficulty Paying"] / dfupaycount["#total_transactions"])*100
+    dfupaycount["% payment issues"] = round(dfupaycount["% payment issues"],2)
+    dfu_sort = dfupaycount[["% payment issues"]].sort_values(by = "% payment issues", ascending = False).reset_index()
+
+    fig = plt.figure(figsize=(10, 10))
+    plt.bar(dfu_sort["payment_method"],dfu_sort["% payment issues"])
+    plt.ylabel("Payment issues %")
+    plt.title('Payment issues by payment method')
+    
+    col1, col2,col3 = st.columns([1,3,2])
+    with col2:
+        st.pyplot(fig.figure)
