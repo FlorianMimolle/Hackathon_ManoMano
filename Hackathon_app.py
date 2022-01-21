@@ -253,5 +253,5 @@ if page == "Payment":
     with col2:
         st.pyplot(fig.figure)
     with col3:
-        a = dfu_sort[["payment_method","#total_transactions"]].set_index("payment_method").rename(columns = ["Transaction"])
+        a = dfu_sort[["payment_method","#total_transactions"]].set_index("payment_method").rename(columns = {"#total_transactions":"Transaction"})
         a
